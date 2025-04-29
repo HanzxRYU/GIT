@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Level PRO Web - Fun & Elegant</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        font-family: "Poppins", sans-serif;
+        overflow: hidden;
+        background: linear-gradient(120deg, #0f0c29, #302b63, #24243e);
+        transition: background 0.5s ease;
+      }
+      header {
+        padding: 2rem;
+        text-align: center;
+        color: #00ffff;
+      }
+      header h1 {
+        font-family: "Orbitron", sans-serif;
+        font-size: 3rem;
+        text-shadow: 0 0 10px #00ffff;
+      }
+      main {
+        padding: 1rem;
+        text-align: center;
+        color: white;
+      }
+      footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        padding: 1rem;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        font-size: 0.8rem;
+      }
+      /* Dark Mode */
+      body.light-mode {
+        background: linear-gradient(120deg, #ffffff, #f8f8ff, #e0e0e0);
+        color: black;
+      }
+      body.light-mode header h1 {
+        color: #ff6ec4;
+        text-shadow: 0 0 10px #ff6ec4;
+      }
+      body.light-mode footer {
+        background: rgba(255, 255, 255, 0.8);
+        color: black;
+      }
+      /* Toggle Button */
+      #toggleMode {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background: #00ffff;
+        color: black;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: bold;
+        box-shadow: 0 0 10px #00ffff;
+      }
+      #toggleMode:hover {
+        background: #ff6ec4;
+        box-shadow: 0 0 20px #ff6ec4;
+      }
+      /* Floating Balloons */
+      .balloon {
+        position: absolute;
+        width: 30px;
+        height: 40px;
+        background: radial-gradient(circle at center, #ff6ec4, #ff1493);
+        border-radius: 50% 50% 45% 45%;
+        animation: floatUp linear infinite;
+      }
+      @keyframes floatUp {
+        from {
+          bottom: -50px;
+        }
+        to {
+          bottom: 110%;
+        }
+      }
+      /* Maskot */
+      .mascot {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        width: 80px;
+        height: 80px;
+        background-size: cover;
+        cursor: pointer;
+        animation: bounce 2s infinite;
+      }
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+      .chat-bubble {
+        position: fixed;
+        bottom: 120px;
+        left: 30px;
+        background: rgba(255, 255, 255, 0.9);
+        color: black;
+        padding: 8px 15px;
+        border-radius: 20px;
+        display: none;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        font-size: 0.9rem;
+      }
+      /* Game Canvas */
+      #gameCanvas {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border: 2px solid #00ffff;
+        background: rgba(0, 0, 0, 0.6);
+      }
+      #scoreBoard {
+        position: fixed;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #00ffff;
+        font-weight: bold;
+        font-size: 1.5rem;
+        text-shadow: 0 0 10px #00ffff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <button id="toggleMode">Mode Gelap/Terang</button>
+    <header>
+      <h1>🚀 Web Level PRO 🚀</h1>
+    </header>
+    <main>
+      <p>Website fun, elegant, modern, plus mini-game tembak target!</p>
+    </main>
+    <footer>&copy; 2025 | Kreasi PRO oleh Kamu</footer>
+
+    <!-- Balon terbang -->
+    <div id="balloonContainer"></div>
+
+    <!-- Maskot -->
+    <div class="mascot" id="mascot"></div>
+    <div class="chat-bubble" id="chatBubble">Halo! 👋</div>
+
+    <!-- Canvas Game -->
+    <canvas id="gameCanvas" width="400" height="300"></canvas>
+    <div id="scoreBoard">Skor: 0</div>
+
+    <!-- Audio -->
+    <audio
+      id="shootSound"
+      src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_7c1e4ef2aa.mp3?filename=gunshot-187077.mp3"
+    ></audio>
+    <audio
+      id="hitSound"
+      src="https://cdn.pixabay.com/download/audio/2022/03/22/audio_cbfac432cf.mp3?filename=success-1-6297.mp3"
+    ></audio>
+
+    <script>
+      // Mode Gelap/Terang
+      const toggleBtn = document.getElementById("toggleMode");
+      toggleBtn.addEventListener("click", () => {
+        document.body.classList.toggle("light-mode");
+      });
+
+      // Balon terbang random
+      function createBalloon() {
+        const balloon = document.createElement("div");
+        balloon.className = "balloon";
+        balloon.style.left = Math.random() * 100 + "vw";
+        balloon.style.animationDuration = 4 + Math.random() * 6 + "s";
+        balloon.style.background = `radial-gradient(circle at center, hsl(${
+          Math.random() * 360
+        },100%,70%), hsl(${Math.random() * 360},100%,50%))`;
+        document.getElementById("balloonContainer").appendChild(balloon);
+        setTimeout(() => {
+          balloon.remove();
+        }, 10000);
+      }
+      setInterval(createBalloon, 800);
+
+      // Maskot ganti kostum dan ngobrol
+      const mascot = document.getElementById("mascot");
+      const chatBubble = document.getElementById("chatBubble");
+      const costumes = [
+        "https://i.ibb.co/4VRg48S/mascot-cute.png",
+        "https://i.ibb.co/vZHh9St/mascot-happy.png",
+        "https://i.ibb.co/QKjCpn6/mascot-robot.png",
+      ];
+      const messages = [
+        "Halo! 👋",
+        "Ayo main game! 🎯",
+        "Kamu hebat! 🌟",
+        "Coba klik target! 🔥",
+      ];
+      let costumeIndex = 0;
+      mascot.style.backgroundImage = `url(${costumes[0]})`;
+      mascot.addEventListener("click", () => {
+        costumeIndex = (costumeIndex + 1) % costumes.length;
+        mascot.style.backgroundImage = `url(${costumes[costumeIndex]})`;
+        chatBubble.textContent =
+          messages[Math.floor(Math.random() * messages.length)];
+        chatBubble.style.display = "block";
+        setTimeout(() => {
+          chatBubble.style.display = "none";
+        }, 3000);
+      });
+
+      // Game logic
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      let target = { x: 100, y: 100, r: 20 };
+      let score = 0;
+
+      function drawTarget() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        ctx.arc(target.x, target.y, target.r, 0, Math.PI * 2);
+        ctx.fillStyle = "#ff6ec4";
+        ctx.fill();
+      }
+
+      canvas.addEventListener("click", (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+        const dist = Math.sqrt((mx - target.x) ** 2 + (my - target.y) ** 2);
+        document.getElementById("shootSound").play();
+        if (dist < target.r) {
+          score++;
+          document.getElementById("hitSound").play();
+          document.getElementById("scoreBoard").textContent = "Skor: " + score;
+          moveTarget();
+        }
+      });
+
+      function moveTarget() {
+        target.x = Math.random() * (canvas.width - 40) + 20;
+        target.y = Math.random() * (canvas.height - 40) + 20;
+      }
+
+      setInterval(drawTarget, 30);
+      moveTarget();
+    </script>
+  </body>
+</html>
